@@ -6,45 +6,43 @@ using UnityEngine.UI;
 
 public class Inventory : MonoBehaviour
 {
-    [Header("UI References")]
-    [SerializeField] private GameObject hotBarObject;
-    [SerializeField] private GameObject inventorySlotParent;
-    [SerializeField] private GameObject inventoryContainer;
-    [SerializeField] private Image draggedItemIcon;
-    
-    [Header("Visual Feedback")]
-    [SerializeField] private Material itemHighlightMaterial;
-
-    [Header("Player References")]
-    [SerializeField] private Transform playerCameraTransform;
-    [SerializeField] private Transform playerHandTransform;
-    
-    [Header("Input Actions")]
-    [SerializeField] private InputActionReference toggleInventoryAction;
-    [SerializeField] private InputActionReference pickUpItemAction;
-    [SerializeField] private InputActionReference dropItemAction;
-
-    [Header("Hotbar Input Actions")]
-    [SerializeField] private InputActionReference[] hotbarActions;
-
     private const float EquippedSlotOpacity = 0.9f;
     private const float UnequippedSlotOpacity = 0.5f;
     private const float PickupRange = 3f;
 
+    [Header("UI References")] 
+    [SerializeField] private GameObject hotBarObject;
+    [SerializeField] private GameObject inventorySlotParent;
+    [SerializeField] private GameObject inventoryContainer;
+    [SerializeField] private Image draggedItemIcon;
+
+    [Header("Visual Feedback")] 
+    [SerializeField] private Material itemHighlightMaterial;
+
+    [Header("Player References")] 
+    [SerializeField] private Transform playerCameraTransform;
+    [SerializeField] private Transform playerHandTransform;
+
+    [Header("Input Actions")] 
+    [SerializeField] private InputActionReference toggleInventoryAction;
+    [SerializeField] private InputActionReference pickUpItemAction;
+    [SerializeField] private InputActionReference dropItemAction;
+
+    [Header("Hotbar Input Actions")] 
+    [SerializeField] private InputActionReference[] hotbarActions;
+
     private readonly List<Slot> _allSlots = new();
     private readonly List<Slot> _hotbarSlots = new();
     private readonly List<Slot> _inventorySlots = new();
-    
-    private int _selectedHotbarIndex;
-    private bool _isDraggingItem;
-    private Renderer _highlightedItemRenderer;
-    private Material _highlightedItemOriginalMaterial;
-    private GameObject _currentlyHeldItem;
     private Slot _currentlyDraggedSlot;
+    private GameObject _currentlyHeldItem;
+    private Material _highlightedItemOriginalMaterial;
+    private Renderer _highlightedItemRenderer;
     private Action<InputAction.CallbackContext>[] _hotbarCallbacks;
-    
-    public static event Action<bool> OnInventoryToggled;
-    
+    private bool _isDraggingItem;
+
+    private int _selectedHotbarIndex;
+
     private void Awake()
     {
         _inventorySlots.AddRange(inventorySlotParent.GetComponentsInChildren<Slot>());
@@ -52,14 +50,13 @@ public class Inventory : MonoBehaviour
 
         _allSlots.AddRange(_inventorySlots);
         _allSlots.AddRange(_hotbarSlots);
-        
+
         _hotbarCallbacks = new Action<InputAction.CallbackContext>[hotbarActions.Length];
         for (var i = 0; i < hotbarActions.Length; i++)
         {
             var index = i;
             _hotbarCallbacks[i] = _ => HandleHotbarKeySelection(index);
         }
-
     }
 
     private void Update()
@@ -96,6 +93,8 @@ public class Inventory : MonoBehaviour
         for (var i = 0; i < hotbarActions.Length; i++)
             hotbarActions[i].action.performed -= _hotbarCallbacks[i];
     }
+
+    public static event Action<bool> OnInventoryToggled;
 
     private void AddItem(ItemSo itemToAdd, int amount)
     {
@@ -215,7 +214,7 @@ public class Inventory : MonoBehaviour
     private Slot GetHoveredSlot()
     {
         foreach (var slot in _allSlots)
-            if (slot.isHovering)
+            if (slot.GetIsHovering())
                 return slot;
 
         return null;
@@ -330,7 +329,7 @@ public class Inventory : MonoBehaviour
                     : new Color(1, 1, 1, UnequippedSlotOpacity);
         }
     }
-    
+
     private void HandleHotbarKeySelection(int index)
     {
         _selectedHotbarIndex = index;
@@ -340,18 +339,15 @@ public class Inventory : MonoBehaviour
 
     private void EquipHandItem()
     {
-        if (_currentlyHeldItem != null)
-        {
-            Destroy(_currentlyHeldItem.gameObject);
-        }
-        
-        Slot equippedSlot = _hotbarSlots[_selectedHotbarIndex];
+        if (_currentlyHeldItem != null) Destroy(_currentlyHeldItem.gameObject);
+
+        var equippedSlot = _hotbarSlots[_selectedHotbarIndex];
         if (!equippedSlot.HasItem()) return;
-        
+
         var item = equippedSlot.GetItem();
-        if (item.handItemPrefab == null) return;
-        
-        _currentlyHeldItem = Instantiate(item.handItemPrefab, playerHandTransform);
+        if (item.itemHandPrefab == null) return;
+
+        _currentlyHeldItem = Instantiate(item.itemHandPrefab, playerHandTransform);
         _currentlyHeldItem.transform.localPosition = Vector3.zero;
         _currentlyHeldItem.transform.localRotation = Quaternion.identity;
     }

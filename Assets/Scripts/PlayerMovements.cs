@@ -14,8 +14,8 @@ public class PlayerMovements : MonoBehaviour
     [SerializeField] private float gravity = -12f;
     [SerializeField] private float initialFallVelocity = -2f;
 
-    [Header("Crouch")] [SerializeField] private float standingHeigh = 2f;
-
+    [Header("Crouch")] 
+    [SerializeField] private float standingHeigh = 2f;
     [SerializeField] private float crouchingHeigh = 1f;
     [SerializeField] private float crouchTransitionSpeed = 10f;
     [SerializeField] private float cameraOffset = 0.2f;
@@ -35,12 +35,12 @@ public class PlayerMovements : MonoBehaviour
     private bool _isGrounded;
     private bool _isInventoryOpened;
     private bool _isSprinting;
-    
+
     private Vector2 _lookInput;
     private Vector2 _moveInput;
     private Vector2 _sprintInput;
     private Vector2 _crouchInput;
-    
+
     private float _targetHeight;
     private float _verticalAngle;
     private float _verticalVelocity;

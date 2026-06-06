@@ -7,6 +7,5 @@ public class ItemSo : ScriptableObject
     [SerializeField] public Sprite itemSprite;
     [SerializeField] public int itemMaxStack;
     [SerializeField] public GameObject itemPrefab;
-    [SerializeField] public GameObject handItemPrefab;
-    [SerializeField] private GameObject itemHand;
+    [SerializeField] public GameObject itemHandPrefab;
 }

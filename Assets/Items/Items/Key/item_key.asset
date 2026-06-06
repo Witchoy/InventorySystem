@@ -16,5 +16,5 @@ MonoBehaviour:
   itemSprite: {fileID: 21300000, guid: 0dc4891cdc337284899b36ca3e7a2183, type: 3}
   itemMaxStack: 1
   itemPrefab: {fileID: 6403900414263541166, guid: fd155e0c0d188ae44b61041de026f8a2, type: 3}
-  handItemPrefab: {fileID: 5548270960723451987, guid: 4c38df0af637e764c9dc084ff7e182c5, type: 3}
+  itemHandPrefab: {fileID: 5548270960723451987, guid: 4c38df0af637e764c9dc084ff7e182c5, type: 3}
   itemHand: {fileID: 5548270960723451987, guid: 4c38df0af637e764c9dc084ff7e182c5, type: 3}

@@ -5,21 +5,21 @@ using UnityEngine.UI;
 
 public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public bool isHovering;
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI amountText;
-
     private ItemSo _heldItem;
+    private bool _isHovering;
+
     private int _itemAmount;
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        isHovering = true;
+        _isHovering = true;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        isHovering = false;
+        _isHovering = false;
     }
 
     public ItemSo GetItem()
@@ -83,5 +83,10 @@ public class Slot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public bool HasItem()
     {
         return _heldItem != null;
+    }
+
+    public bool GetIsHovering()
+    {
+        return _isHovering;
     }
 }
