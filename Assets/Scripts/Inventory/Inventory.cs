@@ -25,12 +25,7 @@ public class Inventory : MonoBehaviour
     [SerializeField] private InputActionReference dropItemAction;
 
     [Header("Hotbar Input Actions")]
-    [SerializeField] private InputActionReference hb0Action;
-    [SerializeField] private InputActionReference hb1Action;
-    [SerializeField] private InputActionReference hb2Action;
-    [SerializeField] private InputActionReference hb3Action;
-    [SerializeField] private InputActionReference hb4Action;
-    [SerializeField] private InputActionReference hb5Action;
+    [SerializeField] private InputActionReference[] hotbarActions;
 
     private const float EquippedSlotOpacity = 0.9f;
     private const float UnequippedSlotOpacity = 0.5f;
@@ -40,15 +35,16 @@ public class Inventory : MonoBehaviour
     private readonly List<Slot> _hotbarSlots = new();
     private readonly List<Slot> _inventorySlots = new();
     
-    private GameObject _currentlyHeldItem;
-    private Slot _currentlyDraggedSlot;
-
     private int _selectedHotbarIndex;
     private bool _isDraggingItem;
     private Renderer _highlightedItemRenderer;
     private Material _highlightedItemOriginalMaterial;
+    private GameObject _currentlyHeldItem;
+    private Slot _currentlyDraggedSlot;
+    private Action<InputAction.CallbackContext>[] _hotbarCallbacks;
     
-
+    public static event Action<bool> OnInventoryToggled;
+    
     private void Awake()
     {
         _inventorySlots.AddRange(inventorySlotParent.GetComponentsInChildren<Slot>());
@@ -56,6 +52,14 @@ public class Inventory : MonoBehaviour
 
         _allSlots.AddRange(_inventorySlots);
         _allSlots.AddRange(_hotbarSlots);
+        
+        _hotbarCallbacks = new Action<InputAction.CallbackContext>[hotbarActions.Length];
+        for (var i = 0; i < hotbarActions.Length; i++)
+        {
+            var index = i;
+            _hotbarCallbacks[i] = _ => HandleHotbarKeySelection(index);
+        }
+
     }
 
     private void Update()
@@ -76,12 +80,8 @@ public class Inventory : MonoBehaviour
 
         dropItemAction.action.performed += Drop;
 
-        hb0Action.action.performed += HandleHotbarKey0Selection;
-        hb1Action.action.performed += HandleHotbarKey1Selection;
-        hb2Action.action.performed += HandleHotbarKey2Selection;
-        hb3Action.action.performed += HandleHotbarKey3Selection;
-        hb4Action.action.performed += HandleHotbarKey4Selection;
-        hb5Action.action.performed += HandleHotbarKey5Selection;
+        for (var i = 0; i < hotbarActions.Length; i++)
+            hotbarActions[i].action.performed += _hotbarCallbacks[i];
     }
 
     private void OnDisable()
@@ -93,15 +93,9 @@ public class Inventory : MonoBehaviour
 
         dropItemAction.action.performed -= Drop;
 
-        hb0Action.action.performed -= HandleHotbarKey0Selection;
-        hb1Action.action.performed -= HandleHotbarKey1Selection;
-        hb2Action.action.performed -= HandleHotbarKey2Selection;
-        hb3Action.action.performed -= HandleHotbarKey3Selection;
-        hb4Action.action.performed -= HandleHotbarKey4Selection;
-        hb5Action.action.performed -= HandleHotbarKey5Selection;
+        for (var i = 0; i < hotbarActions.Length; i++)
+            hotbarActions[i].action.performed -= _hotbarCallbacks[i];
     }
-
-    public static event Action<bool> OnInventoryToggled;
 
     private void AddItem(ItemSo itemToAdd, int amount)
     {
@@ -336,45 +330,10 @@ public class Inventory : MonoBehaviour
                     : new Color(1, 1, 1, UnequippedSlotOpacity);
         }
     }
-
-    private void HandleHotbarKey0Selection(InputAction.CallbackContext ctx)
+    
+    private void HandleHotbarKeySelection(int index)
     {
-        _selectedHotbarIndex = 0;
-        UpdateHotbarOpacity();
-        EquipHandItem();
-    }
-
-    private void HandleHotbarKey1Selection(InputAction.CallbackContext ctx)
-    {
-        _selectedHotbarIndex = 1;
-        UpdateHotbarOpacity();
-        EquipHandItem();
-    }
-
-    private void HandleHotbarKey2Selection(InputAction.CallbackContext ctx)
-    {
-        _selectedHotbarIndex = 2;
-        UpdateHotbarOpacity();
-        EquipHandItem();
-    }
-
-    private void HandleHotbarKey3Selection(InputAction.CallbackContext ctx)
-    {
-        _selectedHotbarIndex = 3;
-        UpdateHotbarOpacity();
-        EquipHandItem();
-    }
-
-    private void HandleHotbarKey4Selection(InputAction.CallbackContext ctx)
-    {
-        _selectedHotbarIndex = 4;
-        UpdateHotbarOpacity();
-        EquipHandItem();
-    }
-
-    private void HandleHotbarKey5Selection(InputAction.CallbackContext ctx)
-    {
-        _selectedHotbarIndex = 5;
+        _selectedHotbarIndex = index;
         UpdateHotbarOpacity();
         EquipHandItem();
     }

@@ -282,12 +282,13 @@ MonoBehaviour:
   toggleInventoryAction: {fileID: -7597352627586995810, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   pickUpItemAction: {fileID: -8862355681962245285, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   dropItemAction: {fileID: -732267953856760707, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  hb0Action: {fileID: 7990142947590494790, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  hb1Action: {fileID: -4031655052319037535, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  hb2Action: {fileID: 8017719747909534530, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  hb3Action: {fileID: -4402258831601800158, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  hb4Action: {fileID: 2235462756515040290, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  hb5Action: {fileID: 3858114133391229760, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  hotbarActions:
+  - {fileID: 7990142947590494790, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  - {fileID: -4031655052319037535, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  - {fileID: 8017719747909534530, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  - {fileID: -4402258831601800158, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  - {fileID: 2235462756515040290, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  - {fileID: 3858114133391229760, guid: 052faaac586de48259a63d0c4782560b, type: 3}
 --- !u!1 &72111716
 GameObject:
   m_ObjectHideFlags: 0

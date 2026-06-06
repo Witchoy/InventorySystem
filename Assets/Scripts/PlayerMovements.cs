@@ -3,15 +3,14 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovements : MonoBehaviour
 {
-    [Header("Speed")] [SerializeField] private float walkingSpeed;
-
+    [Header("Speed")] 
+    [SerializeField] private float walkingSpeed;
     [SerializeField] private float runningSpeed;
     [SerializeField] private float crouchingSpeed;
     [SerializeField] private float mouseSensitivity;
 
-    [Header("Jump and Fall")] [SerializeField]
-    private float jumpForce = 5f;
-
+    [Header("Jump and Fall")] 
+    [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float gravity = -12f;
     [SerializeField] private float initialFallVelocity = -2f;
 
@@ -21,9 +20,8 @@ public class PlayerMovements : MonoBehaviour
     [SerializeField] private float crouchTransitionSpeed = 10f;
     [SerializeField] private float cameraOffset = 0.2f;
 
-    [Header("References")] [SerializeField]
-    private Transform cameraTransform;
-
+    [Header("References")] 
+    [SerializeField] private Transform cameraTransform;
     [SerializeField] private GameObject inventory;
     [SerializeField] private InputActionReference moveAction;
     [SerializeField] private InputActionReference lookAction;
@@ -32,19 +30,19 @@ public class PlayerMovements : MonoBehaviour
     [SerializeField] private InputActionReference jumpAction;
 
     private CharacterController _characterController;
-    private Vector2 _crouchInput;
-    private bool _isCrouching;
 
+    private bool _isCrouching;
     private bool _isGrounded;
     private bool _isInventoryOpened;
     private bool _isSprinting;
+    
     private Vector2 _lookInput;
-
     private Vector2 _moveInput;
     private Vector2 _sprintInput;
+    private Vector2 _crouchInput;
+    
     private float _targetHeight;
     private float _verticalAngle;
-
     private float _verticalVelocity;
 
     private void Awake()
