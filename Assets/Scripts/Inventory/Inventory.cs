@@ -6,49 +6,53 @@ using UnityEngine.UI;
 
 public class Inventory : MonoBehaviour
 {
-    [SerializeField] private GameObject hotBarObj;
+    [Header("UI References")]
+    [SerializeField] private GameObject hotBarObject;
     [SerializeField] private GameObject inventorySlotParent;
-    [SerializeField] private GameObject container;
+    [SerializeField] private GameObject inventoryContainer;
+    [SerializeField] private Image draggedItemIcon;
+    
+    [Header("Visual Feedback")]
+    [SerializeField] private Material itemHighlightMaterial;
 
-    [SerializeField] private Image dragIcon;
+    [Header("Player References")]
+    [SerializeField] private Transform playerCameraTransform;
+    [SerializeField] private Transform playerHandTransform;
+    
+    [Header("Input Actions")]
+    [SerializeField] private InputActionReference toggleInventoryAction;
+    [SerializeField] private InputActionReference pickUpItemAction;
+    [SerializeField] private InputActionReference dropItemAction;
 
-    [SerializeField] private float pickupRange = 3f;
-    [SerializeField] private Material highlightMaterial;
-
-    [SerializeField] private Transform cameraTransform;
-    [SerializeField] private Transform hand;
-    [SerializeField] private InputActionReference inventoryAction;
-    [SerializeField] private InputActionReference pickUpAction;
-    [SerializeField] private InputActionReference dropAction;
-
-    [Header("Hotbar key references")]
+    [Header("Hotbar Input Actions")]
     [SerializeField] private InputActionReference hb0Action;
     [SerializeField] private InputActionReference hb1Action;
     [SerializeField] private InputActionReference hb2Action;
     [SerializeField] private InputActionReference hb3Action;
     [SerializeField] private InputActionReference hb4Action;
     [SerializeField] private InputActionReference hb5Action;
-    public float equippedOpacity = 0.9f;
-    public float normalOpacity = 0.5f;
+
+    private const float EquippedSlotOpacity = 0.9f;
+    private const float UnequippedSlotOpacity = 0.5f;
+    private const float PickupRange = 3f;
 
     private readonly List<Slot> _allSlots = new();
     private readonly List<Slot> _hotbarSlots = new();
-
     private readonly List<Slot> _inventorySlots = new();
+    
+    private GameObject _currentlyHeldItem;
+    private Slot _currentlyDraggedSlot;
 
-    private Slot _draggingSlot;
-
-    private int _equippedHotbarIndex;
-    private bool _isDragging;
-    private Renderer _lookedAtRenderer;
-    private Material _originalMaterial;
-    private GameObject _currentHandItem;
+    private int _selectedHotbarIndex;
+    private bool _isDraggingItem;
+    private Renderer _highlightedItemRenderer;
+    private Material _highlightedItemOriginalMaterial;
     
 
     private void Awake()
     {
         _inventorySlots.AddRange(inventorySlotParent.GetComponentsInChildren<Slot>());
-        _hotbarSlots.AddRange(hotBarObj.GetComponentsInChildren<Slot>());
+        _hotbarSlots.AddRange(hotBarObject.GetComponentsInChildren<Slot>());
 
         _allSlots.AddRange(_inventorySlots);
         _allSlots.AddRange(_hotbarSlots);
@@ -65,12 +69,12 @@ public class Inventory : MonoBehaviour
 
     private void OnEnable()
     {
-        inventoryAction.action.performed += ToggleInventory;
-        inventoryAction.action.canceled += ToggleInventory;
+        toggleInventoryAction.action.performed += ToggleInventory;
+        toggleInventoryAction.action.canceled += ToggleInventory;
 
-        pickUpAction.action.performed += Pickup;
+        pickUpItemAction.action.performed += Pickup;
 
-        dropAction.action.performed += Drop;
+        dropItemAction.action.performed += Drop;
 
         hb0Action.action.performed += HandleHotbarKey0Selection;
         hb1Action.action.performed += HandleHotbarKey1Selection;
@@ -82,12 +86,12 @@ public class Inventory : MonoBehaviour
 
     private void OnDisable()
     {
-        inventoryAction.action.performed -= ToggleInventory;
-        inventoryAction.action.canceled -= ToggleInventory;
+        toggleInventoryAction.action.performed -= ToggleInventory;
+        toggleInventoryAction.action.canceled -= ToggleInventory;
 
-        pickUpAction.action.performed -= Pickup;
+        pickUpItemAction.action.performed -= Pickup;
 
-        dropAction.action.performed -= Drop;
+        dropItemAction.action.performed -= Drop;
 
         hb0Action.action.performed -= HandleHotbarKey0Selection;
         hb1Action.action.performed -= HandleHotbarKey1Selection;
@@ -142,30 +146,30 @@ public class Inventory : MonoBehaviour
 
             if (hovered != null && hovered.HasItem())
             {
-                _draggingSlot = hovered;
-                _isDragging = true;
+                _currentlyDraggedSlot = hovered;
+                _isDraggingItem = true;
 
-                dragIcon.sprite = hovered.GetItem().itemSprite;
-                dragIcon.color = new Color(1, 1, 1, 0.5f);
-                dragIcon.enabled = true;
+                draggedItemIcon.sprite = hovered.GetItem().itemSprite;
+                draggedItemIcon.color = new Color(1, 1, 1, 0.5f);
+                draggedItemIcon.enabled = true;
             }
         }
     }
 
     private void EndDrag()
     {
-        if (Input.GetMouseButtonUp(0) && _isDragging)
+        if (Input.GetMouseButtonUp(0) && _isDraggingItem)
         {
             var hovered = GetHoveredSlot();
 
             if (hovered != null)
             {
-                HandleDrop(_draggingSlot, hovered);
+                HandleDrop(_currentlyDraggedSlot, hovered);
 
-                dragIcon.enabled = false;
+                draggedItemIcon.enabled = false;
 
-                _draggingSlot = null;
-                _isDragging = false;
+                _currentlyDraggedSlot = null;
+                _isDraggingItem = false;
             }
         }
     }
@@ -211,7 +215,7 @@ public class Inventory : MonoBehaviour
 
     private void UpdateDragItemPosition()
     {
-        if (_isDragging) dragIcon.transform.position = Input.mousePosition;
+        if (_isDraggingItem) draggedItemIcon.transform.position = Input.mousePosition;
     }
 
     private Slot GetHoveredSlot()
@@ -240,25 +244,25 @@ public class Inventory : MonoBehaviour
 
     private void HandleToggleInventory()
     {
-        container.SetActive(!container.activeInHierarchy);
+        inventoryContainer.SetActive(!inventoryContainer.activeInHierarchy);
         Cursor.lockState = Cursor.lockState == CursorLockMode.Locked ? CursorLockMode.None : CursorLockMode.Locked;
         Cursor.visible = !Cursor.visible;
 
-        if (!container.activeInHierarchy && _isDragging)
+        if (!inventoryContainer.activeInHierarchy && _isDraggingItem)
         {
-            _isDragging = false;
-            _draggingSlot = null;
-            dragIcon.enabled = false;
+            _isDraggingItem = false;
+            _currentlyDraggedSlot = null;
+            draggedItemIcon.enabled = false;
         }
 
-        OnInventoryToggled?.Invoke(container.activeInHierarchy);
+        OnInventoryToggled?.Invoke(inventoryContainer.activeInHierarchy);
     }
 
     private void HandlePickUp()
     {
-        if (_lookedAtRenderer != null)
+        if (_highlightedItemRenderer != null)
         {
-            var item = _lookedAtRenderer.GetComponent<Item>();
+            var item = _highlightedItemRenderer.GetComponent<Item>();
             if (item != null)
             {
                 AddItem(item.item, item.amount);
@@ -270,7 +274,7 @@ public class Inventory : MonoBehaviour
 
     private void HandleDropItem()
     {
-        var equippedSlot = _hotbarSlots[_equippedHotbarIndex];
+        var equippedSlot = _hotbarSlots[_selectedHotbarIndex];
 
         if (!equippedSlot.HasItem()) return;
 
@@ -281,7 +285,7 @@ public class Inventory : MonoBehaviour
 
         var dropped = Instantiate(
             prefab,
-            cameraTransform.position + cameraTransform.forward,
+            playerCameraTransform.position + playerCameraTransform.forward,
             Quaternion.identity
         );
 
@@ -297,15 +301,15 @@ public class Inventory : MonoBehaviour
 
     private void DetectLookedAtItem()
     {
-        if (_lookedAtRenderer != null)
+        if (_highlightedItemRenderer != null)
         {
-            _lookedAtRenderer.material = _originalMaterial;
-            _lookedAtRenderer = null;
-            _originalMaterial = null;
+            _highlightedItemRenderer.material = _highlightedItemOriginalMaterial;
+            _highlightedItemRenderer = null;
+            _highlightedItemOriginalMaterial = null;
         }
 
-        var ray = new Ray(cameraTransform.position, cameraTransform.forward);
-        if (Physics.Raycast(ray, out var hit, pickupRange))
+        var ray = new Ray(playerCameraTransform.position, playerCameraTransform.forward);
+        if (Physics.Raycast(ray, out var hit, PickupRange))
         {
             var item = hit.collider.GetComponent<Item>();
             if (item != null)
@@ -313,9 +317,9 @@ public class Inventory : MonoBehaviour
                 var rend = item.GetComponent<Renderer>();
                 if (rend != null)
                 {
-                    _originalMaterial = rend.material;
-                    rend.material = highlightMaterial;
-                    _lookedAtRenderer = rend;
+                    _highlightedItemOriginalMaterial = rend.material;
+                    rend.material = itemHighlightMaterial;
+                    _highlightedItemRenderer = rend;
                 }
             }
         }
@@ -327,69 +331,69 @@ public class Inventory : MonoBehaviour
         {
             var icon = _hotbarSlots[i].GetComponent<Image>(); // was [1]
             if (icon != null)
-                icon.color = i == _equippedHotbarIndex
-                    ? new Color(1, 1, 1, equippedOpacity)
-                    : new Color(1, 1, 1, normalOpacity);
+                icon.color = i == _selectedHotbarIndex
+                    ? new Color(1, 1, 1, EquippedSlotOpacity)
+                    : new Color(1, 1, 1, UnequippedSlotOpacity);
         }
     }
 
     private void HandleHotbarKey0Selection(InputAction.CallbackContext ctx)
     {
-        _equippedHotbarIndex = 0;
+        _selectedHotbarIndex = 0;
         UpdateHotbarOpacity();
         EquipHandItem();
     }
 
     private void HandleHotbarKey1Selection(InputAction.CallbackContext ctx)
     {
-        _equippedHotbarIndex = 1;
+        _selectedHotbarIndex = 1;
         UpdateHotbarOpacity();
         EquipHandItem();
     }
 
     private void HandleHotbarKey2Selection(InputAction.CallbackContext ctx)
     {
-        _equippedHotbarIndex = 2;
+        _selectedHotbarIndex = 2;
         UpdateHotbarOpacity();
         EquipHandItem();
     }
 
     private void HandleHotbarKey3Selection(InputAction.CallbackContext ctx)
     {
-        _equippedHotbarIndex = 3;
+        _selectedHotbarIndex = 3;
         UpdateHotbarOpacity();
         EquipHandItem();
     }
 
     private void HandleHotbarKey4Selection(InputAction.CallbackContext ctx)
     {
-        _equippedHotbarIndex = 4;
+        _selectedHotbarIndex = 4;
         UpdateHotbarOpacity();
         EquipHandItem();
     }
 
     private void HandleHotbarKey5Selection(InputAction.CallbackContext ctx)
     {
-        _equippedHotbarIndex = 5;
+        _selectedHotbarIndex = 5;
         UpdateHotbarOpacity();
         EquipHandItem();
     }
 
     private void EquipHandItem()
     {
-        if (_currentHandItem != null)
+        if (_currentlyHeldItem != null)
         {
-            Destroy(_currentHandItem.gameObject);
+            Destroy(_currentlyHeldItem.gameObject);
         }
         
-        Slot equippedSlot = _hotbarSlots[_equippedHotbarIndex];
+        Slot equippedSlot = _hotbarSlots[_selectedHotbarIndex];
         if (!equippedSlot.HasItem()) return;
         
         var item = equippedSlot.GetItem();
         if (item.handItemPrefab == null) return;
         
-        _currentHandItem = Instantiate(item.handItemPrefab, hand);
-        _currentHandItem.transform.localPosition = Vector3.zero;
-        _currentHandItem.transform.localRotation = Quaternion.identity;
+        _currentlyHeldItem = Instantiate(item.handItemPrefab, playerHandTransform);
+        _currentlyHeldItem.transform.localPosition = Vector3.zero;
+        _currentlyHeldItem.transform.localRotation = Quaternion.identity;
     }
 }

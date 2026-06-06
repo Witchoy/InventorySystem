@@ -272,25 +272,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd9fe6e4204962f4fac252f5e9766afe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Inventory
-  hotBarObj: {fileID: 91647219}
+  hotBarObject: {fileID: 91647219}
   inventorySlotParent: {fileID: 1326161935}
-  container: {fileID: 72111716}
-  dragIcon: {fileID: 1596707822}
-  pickupRange: 3
-  highlightMaterial: {fileID: 2100000, guid: 0d0d4cc57720b1b4bb94eb7bd067e3c0, type: 2}
-  cameraTransform: {fileID: 578370267}
-  hand: {fileID: 687105887}
-  inventoryAction: {fileID: -7597352627586995810, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  pickUpAction: {fileID: -8862355681962245285, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  dropAction: {fileID: -732267953856760707, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inventoryContainer: {fileID: 72111716}
+  draggedItemIcon: {fileID: 1596707822}
+  itemHighlightMaterial: {fileID: 2100000, guid: 0d0d4cc57720b1b4bb94eb7bd067e3c0, type: 2}
+  playerCameraTransform: {fileID: 578370267}
+  playerHandTransform: {fileID: 687105887}
+  toggleInventoryAction: {fileID: -7597352627586995810, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  pickUpItemAction: {fileID: -8862355681962245285, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  dropItemAction: {fileID: -732267953856760707, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   hb0Action: {fileID: 7990142947590494790, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   hb1Action: {fileID: -4031655052319037535, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   hb2Action: {fileID: 8017719747909534530, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   hb3Action: {fileID: -4402258831601800158, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   hb4Action: {fileID: 2235462756515040290, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   hb5Action: {fileID: 3858114133391229760, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  equippedOpacity: 0.9
-  normalOpacity: 0.5
 --- !u!1 &72111716
 GameObject:
   m_ObjectHideFlags: 0
